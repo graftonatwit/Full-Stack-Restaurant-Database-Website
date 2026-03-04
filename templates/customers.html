@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trevor's Restaurant Customers</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='customers.css') }}">
+</head>
+<body>
+    <img src="{{ url_for('static', filename='logo.png') }}" 
+        alt="Restaurant Logo" 
+        class="navbar__logo">
+    
+    <nav class="navbar">
+        
+        <ul class="navbar__menu">
+            <li class="dropdown">
+                <a href="#" class="navbar__links">Navigation</a>    
+                <ul class="dropdown__menu">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/add_customer">Add Customer</a></li>
+                    <li><a href="/menu">Menu</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    <h2>All Customers</h2>
+
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+        </tr>
+
+        {% for customer in customers %}
+        <tr>
+            <td>{{ customer.customer_id }}</td>
+            <td>{{ customer.first_name }}</td>
+            <td>{{ customer.last_name }}</td>
+            <td>{{ customer.phone_number }}</td>
+            <td>{{ customer.email }}</td>
+            <td><form action="/delete_customer/{{ customer.customer_id }}" method="POST">
+                <button type="submit">Delete</button>
+                </form>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <a href="/">Back</a>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trevor's Restaurant Customers</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='add_customers.css') }}">
+</head>
+<body>
+    <img src="{{ url_for('static', filename='logo.png') }}" 
+        alt="Restaurant Logo" 
+        class="navbar__logo">
+    
+    <nav class="navbar">
+        
+        <ul class="navbar__menu">
+            <li class="dropdown">
+                <a href="#" class="navbar__links">Navigation</a>    
+                <ul class="dropdown__menu">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/customers">Customers</a></li>
+                    <li><a href="/menu">Menu</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    <h2>Add Customer</h2>
+
+    <form method="POST" action="/add_customer">
+        First Name: <input type="text" name="first_name" required><br>
+        Last Name: <input type="text" name="last_name" required><br>
+        Phone: <input type="text" name="phone"><br>
+        Email: <input type="email" name="email"><br>
+        <button type="submit">Add Customer</button>
+    </form>
+    </body>
+</html>

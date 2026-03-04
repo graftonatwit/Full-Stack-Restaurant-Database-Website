@@ -1,0 +1,77 @@
+
+body {
+    background-image: url('burger.jpg');
+    background-size: 100% 120%;
+    
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 50% 30%;
+    color: rgb(0, 0, 0);
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0px;
+}
+h1 {
+    text-align: center;
+    margin-left: 5px;
+    margin-top: 2px;
+    color: black;
+    background-color: white;
+}
+
+.navbar {
+    background-color: #111;
+    padding: 10px;
+}
+
+.navbar__menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+}
+
+.navbar__links {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    display: inline-block;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown__menu {
+    display: none;
+    position: absolute;
+    background-color: #222;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    min-width: 150px;
+}
+
+.dropdown__menu li a {
+    display: block;
+    padding: 10px;
+    color: white;
+    text-decoration: none;
+}
+
+.dropdown__menu li a:hover {
+    background-color: #444;
+}
+
+.dropdown:hover .dropdown__menu {
+    display: block;
+}
+.navbar__logo {
+    position: absolute;
+    left: 50%;               /* move to middle of container */
+    transform: translateX(-50%);  /* perfect horizontal center */
+    width: 60px;             /* shrink logo */
+    height: 60px;            /* equal height & width */
+    border-radius: 50%;      /* circular logo */
+    object-fit: cover
+}

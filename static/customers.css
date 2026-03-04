@@ -1,0 +1,89 @@
+body{
+    background-image: url("customers.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    color: black;
+    text-align: center;
+    margin: 0px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+table {
+    width: 70%;
+    text-align: center;
+    margin: 0 auto;
+    align-items: center;
+    border: 1px solid black;
+    border-collapse: collapse;
+    background-color: white;
+}
+th, td {
+    padding: 8px;
+    text-align: center;
+    border-bottom: 1px solid black;
+}
+
+h2 {
+    background-color: white;
+    display: inline-block;
+    padding: 10px 20px;
+}
+
+.navbar {
+    background-color: #111;
+    padding: 10px;
+}
+
+.navbar__menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+}
+
+.navbar__links {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    display: inline-block;
+}
+
+.dropdown {
+    position: relative; /* Make the dropdown container relative */
+    display: inline-block; /* Display the dropdown container inline with other elements */
+}
+
+.dropdown__menu {
+    display: none; /* Hide the dropdown menu by default */
+    position: absolute; /* Position it absolutely relative to the dropdown container */
+    background-color: #222; /* Background color for the dropdown menu */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    min-width: 150px; /* Minimum width for the dropdown menu */
+}
+
+.dropdown__menu li a {
+    display: block; /* Make the links fill the dropdown menu */
+    padding: 10px; /* Add some padding to the links */
+    color: white;
+    text-decoration: none;
+}
+
+.dropdown__menu li a:hover {
+    background-color: #444; /* Change the background color on hover */
+}
+
+.dropdown:hover .dropdown__menu {
+    display: block; /* Show the dropdown menu when hovering over the dropdown container */
+}
+.navbar__logo {
+    position: absolute;
+    left: 50%;               /* move to middle of container */
+    transform: translateX(-50%);  /* perfect horizontal center */
+    width: 60px;             /* shrink logo */
+    height: 60px;            /* equal height & width */
+    border-radius: 50%;      /* circular logo */
+    object-fit: cover
+}

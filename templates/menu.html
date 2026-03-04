@@ -1,0 +1,60 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trevor's Restaurant Menu</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">  
+</head>
+
+<body>
+
+    <img src="{{ url_for('static', filename='logo.png') }}" 
+        alt="Restaurant Logo" 
+        class="navbar__logo">
+    
+    <nav class="navbar">
+        
+        <ul class="navbar__menu">
+            <li class="dropdown">
+                <a href="#" class="navbar__links">Navigation</a>    
+                <ul class="dropdown__menu">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/customers">Customers</a></li>
+                    <li><a href="/add_customers">Add Customer</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    <h1>Trevor's Restaurant Menu</h1>
+    <h2>Add Menu Item</h2>
+
+
+
+    <form method="POST" action="/add_menu_item">
+        Name: <input type="text" name="name" required><br>
+        Description: <input type="text" name="description" required><br>
+        Price: <input type="number" step="0.01" name="Price" required><br>
+        <button type="submit">Add Item</button>
+    </form>
+
+    <hr>
+
+    <table border="1">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+        </tr>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.description }}</td>
+            <td>${{ item.Price }}</td>
+            <td><form action="/delete_menu_item/{{ item.menu_item_id }}" method="POST">
+                <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+        
+</body>
