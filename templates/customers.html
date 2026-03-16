@@ -46,6 +46,10 @@
             <td><form action="/delete_customer/{{ customer.customer_id }}" method="POST">
                 <button type="submit">Delete</button>
                 </form>
+            </td>
+                <td><form action="/update_customer/{{ customer.customer_id }}" method="GET">
+                    <button type="submit">Update</button>
+                    </form>
         </tr>
         {% endfor %}
     </table>
