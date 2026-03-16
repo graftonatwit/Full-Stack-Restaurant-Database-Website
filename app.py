@@ -1,10 +1,27 @@
 
+import os
+
 from flask import Flask, render_template, request, redirect
 import mysql.connector
 from datetime import datetime
+from flask import Flask, render_template, redirect, session
+from face_auth import authenticate_user
+from PIL import Image
+import io
+import numpy as np
+import face_recognition
 
 app = Flask(__name__)
+app.secret_key = "supersecretkey" 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+KNOWN_FACE_PATH = os.path.join("static", "my_face.jpeg")
 
+# Load known face encoding once at startup
+known_image = face_recognition.load_image_file(KNOWN_FACE_PATH)
+known_encodings = face_recognition.face_encodings(known_image)
+if len(known_encodings) == 0:
+    raise Exception("No face found in known image")
+KNOWN_ENCODING = known_encodings[0]
 # Database connection
 def get_db_connection():
     return mysql.connector.connect(
@@ -13,9 +30,58 @@ def get_db_connection():
         password="@flag961TOAD",
         database="myrestaurantdb"
     )
+    
+
+@app.route("/face_login", methods=["GET", "POST"])
+def face_login():
+    if request.method == "POST":
+        if 'image' not in request.files:
+            return "No image uploaded", 400
+
+        file = request.files['image']
+        unknown_image = face_recognition.load_image_file(file)
+
+        # Encode faces in the uploaded image
+        unknown_encodings = face_recognition.face_encodings(unknown_image)
+        if len(unknown_encodings) == 0:
+            return "No face detected in camera image", 400
+
+        # Compare uploaded faces with known face
+        for encoding in unknown_encodings:
+            matches = face_recognition.compare_faces([KNOWN_ENCODING], encoding)
+            if True in matches:
+                session["logged_in"] = True
+                return """
+                    <h2>Face recognized! You are logged in.</h2>
+                    <p>Redirecting to homepage in 3 seconds...</p>
+                    <script>
+                        setTimeout(() => { window.location.href = '/'; }, 3000);
+                    </script>
+                """
+
+        return "Face not recognized"
+
+    # GET request: render the login page
+    return render_template("face_login.html")
+@app.route("/")
+def home():
+    if not session.get("logged_in"):
+        return redirect("/face_login")
+    return """
+        <h1>Welcome to Trevor's Restaurant Management System!</h1>
+        <p>You are logged in.</p>
+        <a href= "/index">Go to homepage</a><br>
+        <a href="/logout">Logout</a>
+    """
+
+@app.route("/logout")
+def logout():
+    session.pop("logged_in", None)
+    return redirect("/face_login")
+
 
 # Home page
-@app.route('/')
+@app.route('/index')
 def index():
     return render_template('index.html')
 

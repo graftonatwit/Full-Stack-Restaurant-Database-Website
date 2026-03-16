@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Face Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='face_login.css') }}">
+</head>
+<body>
+    <h1>Login with Face Recognition</h1>
+    <body style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh;">
+
+    <video id="video" width="320" height="240" autoplay style="border: 2px solid black; border-radius: 8px;"></video>
+    <button id="snap" type="button" style="margin-top: 20px;">Login</button>
+</body>
+<script>
+    const video = document.getElementById('video');
+const snapBtn = document.getElementById('snap');
+
+// Start webcam only once
+navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => video.srcObject = stream)
+    .catch(console.error);
+
+snapBtn.addEventListener('click', async () => {
+    // Create a new canvas for each click
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+
+    // Draw the current frame
+    ctx.drawImage(video, 0, 0);
+
+    // Convert to blob and send to Flask
+    canvas.toBlob(async blob => {
+        const formData = new FormData();
+        formData.append('image', blob, 'snapshot.png');
+
+        const response = await fetch('/face_login', {
+            method: 'POST',
+            body: formData
+        });
+
+        const text = await response.text();
+        alert(text);
+
+        // Optional: redirect on success
+        if (text.includes("recognized")) {
+            window.location.href = "/";
+        }
+    }, 'image/png');
+});
+</script>
+</body>
+</html>

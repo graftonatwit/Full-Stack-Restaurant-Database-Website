@@ -1,0 +1,15 @@
+h1 {
+    text-align: center;
+    margin-top: 50px;
+}
+
+video {
+    border: 2px solid #333;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
