@@ -160,7 +160,10 @@ def delete_customer(customer_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    #cursor.execute("DELETE FROM OrderItem WHERE customer_id = %s", (customer_id,))
+    # Delete related reservations first
+    cursor.execute("DELETE FROM Reservation WHERE Customer_customer_id = %s", (customer_id,))
+    
+    # Now delete the customer
     cursor.execute("DELETE FROM Customer WHERE customer_id = %s", (customer_id,)) 
 
     conn.commit()
@@ -214,7 +217,7 @@ def reservations():
     return render_template('reservations.html', reservations=reservations, customers=customers)
 @app.route('/add_reservation_item', methods=['POST'])
 def add_reservation_item():
-    customer_id = request.form.get('Customer.customer_id')
+    customer_id = request.form.get('customer_id')
     if not customer_id:
         print("Please select a customer.")
         return redirect('/reservations')
