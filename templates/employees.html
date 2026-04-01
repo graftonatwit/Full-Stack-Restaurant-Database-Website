@@ -1,12 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trevor's Restaurant Menu</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">  
+    <title>Trevor's Restaurant Customers</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='customers.css') }}">
 </head>
 
 <body>
-
     <img src="{{ url_for('static', filename='logo.png') }}" 
         alt="Restaurant Logo" 
         class="navbar__logo">
@@ -20,14 +21,14 @@
                     <li><a href="/">Home</a></li>
                     <li><a href="/customers">Customers</a></li>
                     <li><a href="/add_customer">Add Customer</a></li>
+                    <li><a href="/menu">Menu</a></li>
                     <li><a href="/reservations">Reservations</a></li>
-                    <li><a href = "/employees">Employees</a></li>
                 </ul>
             </li>
         </ul>
     </nav>
-    <h1>Trevor's Restaurant Menu</h1>
 
+    <h2>All Customers</h2>
     {% with messages = get_flashed_messages() %}
     {% if messages %}
         <ul style="color: red;
@@ -39,36 +40,35 @@
         </ul>
     {% endif %}
 {% endwith %}
-    <h2>Add Menu Item</h2>
-
-
-
-    <form method="POST" action="/add_menu_item">
-        Name: <input type="text" name="name" required><br>
-        Description: <input type="text" name="description" required><br>
-        Price: <input type="number" step="0.01" name="Price" required><br>
-        <button type="submit">Add Item</button>
-    </form>
-
-    <hr>
-
     <table border="1">
         <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Price</th>
+            <th>ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Role</th>
+            <th>hire_date</th>
         </tr>
-        {% for item in items %}
+
+        {% for employee in employees %}
         <tr>
-            <td>{{ item.name }}</td>
-            <td>{{ item.description }}</td>
-            <td>${{ item.Price }}</td>
-            <td><form action="/delete_menu_item/{{ item.menu_item_id }}" method="POST">
+            <td>{{ employee.employee_id }}</td>
+            <td>{{ employee.first_name }}</td>
+            <td>{{ employee.last_name }}</td>
+            <td>{{ employee.role }}</td>
+            <td>{{ employee.hire_date }}</td>
+            <td><form action="/delete_employee/{{ employee.employee_id }}" method="POST">
                 <button type="submit">Delete</button>
                 </form>
             </td>
+                <td><form action="/update_employee/{{ employee.employee_id }}" method="GET">
+                    <button type="submit">Update</button>
+                    </form>
         </tr>
         {% endfor %}
     </table>
-        
+    <a href="/add_employee">
+    <button type="button">Add Employee</button>
+    </a>
+
 </body>
+</html>

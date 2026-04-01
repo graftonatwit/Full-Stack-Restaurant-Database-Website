@@ -1,0 +1,37 @@
+<h2>Add Employee</h2>
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul style="color: red;">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+<form method="POST">
+    <label>First Name:</label>
+    <input type="text" name="first_name" required 
+    pattern="[A-Za-z]+" 
+    title="Only letters allowed (no spaces or numbers)"><br>
+
+    <label>Last Name:</label>
+    <input type="text" name="last_name" required 
+    pattern="[A-Za-z]+" 
+    title="Only letters allowed (no spaces or numbers)"><br>
+
+    <label>Role:</label>
+    <select name="role" required>
+    <option value="">-- Select Role --</option>
+    <option value="Server">Server</option>
+    <option value="Chef">Chef</option>
+    <option value="Host">Host</option>
+    <option value="Manager">Manager</option>
+    <option value="Bartender">Bartender</option>
+</select>
+<br>
+
+<label>Hire Date</label>
+<input type = "date" name = "hire_date" required>
+
+    <button type="submit">Add Employee</button>
+</form>

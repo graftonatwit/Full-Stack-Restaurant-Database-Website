@@ -21,13 +21,24 @@
                     <li><a href="/add_customer">Add Customer</a></li>
                     <li><a href="/menu">Menu</a></li>
                     <li><a href="/reservations">Reservations</a></li>
+                    <li><a href = "/employees">Employees</a></li>
                 </ul>
             </li>
         </ul>
     </nav>
 
     <h2>All Customers</h2>
-
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul style="color: red;
+        background-color: white;
+        display: block">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
     <table border="1">
         <tr>
             <th>ID</th>

@@ -21,15 +21,28 @@
                     <li><a href="/customers">Customers</a></li>
                     <li><a href="/add_customer">Add Customer</a></li>
                     <li><a href="/menu">Menu</a></li>
+                    <li><a href = "/employees">Employees</a></li>
                 </ul>
             </li>
         </ul>
     </nav>
 
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul style="color: red;
+        background-color: white;
+        display: block">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
 
     <h1>Trevor's Restaurant Reservations</h1>
     <form action="/add_reservation_item" method="POST">
-    <label for="Customer.customer_id">Customer:</label>
+    <label for="customer_id">Customer:</label>
     <select name="customer_id" required>
     {% for customer in customers %}
         <option value="{{ customer.customer_id }}">
@@ -71,7 +84,13 @@
                 <button type="submit">Delete</button>
                 </form>
             </td> 
+            <td><form action="/update_reservation/{{ reservation.reservation_id }}" method="GET">
+                    <button type="submit">Update</button>
+                    </form>
+                </td>
         </tr>
         {% endfor %}
     </table>
+
         
+</html>

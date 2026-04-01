@@ -1,7 +1,7 @@
 
 import os
 
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, flash
 import mysql.connector
 from datetime import datetime
 from flask import Flask, render_template, redirect, session
@@ -10,15 +10,16 @@ from PIL import Image
 import io
 import numpy as np
 import face_recognition
+import re
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey" 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-KNOWN_FACE_PATH = os.path.join("static", "my_face.jpeg")
+KNOWN_FACE_PATH = os.path.join("static", "my_face.jpeg") # Make sure this path is correct
 
 # Load known face encoding once at startup
-known_image = face_recognition.load_image_file(KNOWN_FACE_PATH)
-known_encodings = face_recognition.face_encodings(known_image)
+known_image = face_recognition.load_image_file(KNOWN_FACE_PATH) # Make sure this path is correct and the image exists
+known_encodings = face_recognition.face_encodings(known_image) # Check if a face was found in the known image
 if len(known_encodings) == 0:
     raise Exception("No face found in known image")
 KNOWN_ENCODING = known_encodings[0]
@@ -52,10 +53,9 @@ def face_login():
             if True in matches:
                 session["logged_in"] = True
                 return """
-                    <h2>Face recognized! You are logged in.</h2>
-                    <p>Redirecting to homepage in 3 seconds...</p>
+                    
                     <script>
-                        setTimeout(() => { window.location.href = '/'; }, 3000);
+                        setTimeout(() => { window.location.href = '/'; }, 1000);
                     </script>
                 """
 
@@ -108,7 +108,32 @@ def add_menu_item():
     name = request.form['name']
     description = request.form['description']
     Price = request.form['Price']
+    
+    errors = [] # List to hold error messages
+    
+    if not name or not description or not Price:
+        errors.append('Please fill in all fields.')
+        
+    if not name.replace(" ", "").replace("-", "").isalpha():
+        errors.append('Menu item name cannot contain numbers.', )
 
+    if not description.replace(" ", "").replace("-", "").replace(".", "").replace(",", "").replace("!", "").replace("?", "").isalpha():
+        errors.append('Menu item description cannot contain numbers.')
+
+    try:
+        price = float(Price)
+        if price < 0:
+            errors.append("Price must be positive.")
+    except ValueError:
+        errors.append("Price must be a valid number (e.g., 12.99).")
+
+        
+    if errors:
+        for error in errors:
+            flash(error)
+        return redirect('/menu')
+
+    
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -128,7 +153,7 @@ def delete_menu_item(item_id):
 
     conn.commit()
     conn.close()
-
+    flash("Menu item deleted successfully.")
     return redirect("/menu")
 
 
@@ -141,7 +166,28 @@ def add_customer():
         last = request.form['last_name']
         phone = request.form['phone']
         email = request.form['email']
+        errors = []
+        if not first:
+            errors.append("First name is required.")
+        if not last:
+            errors.append("Last name is required.")
+        if not phone:
+            errors.append("Phone is required.")
+        if not email:
+            errors.append("Email is required.")
+        if not re.fullmatch(r"[A-Za-z]+", first):
+            errors.append('First name cannot contain numbers, spaces, or special characters.')
 
+        if not re.fullmatch(r"[A-Za-z]+", last  ):
+            errors.append('Last name cannot contain numbers, spaces, or special characters.')
+        
+        if not re.fullmatch(r"\d{10}", phone):
+            errors.append("Invalid phone number. Must be 10 digits.") 
+        if errors:
+            # Flash all errors and stay on the same page
+            for error in errors:
+                flash(error)
+            return render_template("customers.html")
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("""
@@ -168,12 +214,11 @@ def delete_customer(customer_id):
 
     conn.commit()
     conn.close()
-
+    flash("Customer deleted successfully.")
     return redirect("/customers")
 
 @app.route("/update_customer/<int:id>", methods=["GET", "POST"])
 def update_customer(id):
-
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
@@ -182,23 +227,46 @@ def update_customer(id):
         last = request.form["last_name"]
         phone = request.form["phone"]
         email = request.form["email"]
+        errors = []
 
+        # validation
+        if not first:
+            errors.append("First name is required.")
+        if not last:
+            errors.append("Last name is required.")
+        if not phone:
+            errors.append("Phone is required.")
+        if not email:
+            errors.append("Email is required.")
+        if not re.fullmatch(r"[A-Za-z]+", first):
+            errors.append("First name cannot contain numbers, spaces, or special characters.")
+        if not re.fullmatch(r"[A-Za-z]+", last):
+            errors.append("Last name cannot contain numbers, spaces, or special characters.")
+        if not re.fullmatch(r"\d{10}", phone):
+            errors.append("Invalid phone number. Must be 10 digits.") 
+
+        if errors:
+            for error in errors:
+                flash(error)
+            cursor.execute("SELECT * FROM customer WHERE customer_id=%s", (id,))
+            customer = cursor.fetchone()
+            return render_template("update_customer.html", customer=customer)
+
+        # update DB
         cursor.execute("""
             UPDATE customer
-            SET first_name=%s,
-                last_name=%s,
-                phone_number=%s,
-                email=%s
+            SET first_name=%s, last_name=%s, phone_number=%s, email=%s
             WHERE customer_id=%s
         """, (first, last, phone, email, id))
-
         conn.commit()
 
-        return redirect("/customers")
+        # flash success and redirect to main page
+        flash("Customer updated successfully.")
+        return redirect("/customers")  # <-- goes to main page
 
+    # GET request → show update form
     cursor.execute("SELECT * FROM customer WHERE customer_id=%s", (id,))
     customer = cursor.fetchone()
-
     return render_template("update_customer.html", customer=customer)
 
 @app.route('/reservations')
@@ -223,6 +291,33 @@ def add_reservation_item():
         return redirect('/reservations')
     reservation_date = request.form['reservation_date']
     party_size = request.form['party_size']
+    
+    errors = []
+    from datetime import datetime, date
+    if reservation_date:
+        try:
+            res_date = datetime.strptime(reservation_date, "%Y-%m-%d").date()
+            if res_date < date.today():
+                errors.append("Reservation date cannot be in the past.")
+        except ValueError:
+            errors.append("Invalid date format.")
+    if party_size == "":
+        errors.append("Please enter a party size.")
+    elif not party_size.isdigit():
+        errors.append("Party size must be a number.")
+    elif int(party_size) < 1:
+        errors.append("Party size must be at least 1.")
+    elif int(party_size) > 15:
+        errors.append("Party size must be at most 15.")
+
+    if reservation_date == "":
+        errors.append("Please enter a reservation date.")
+
+    if errors:
+        for e in errors:
+            flash(e)
+        return redirect('/reservations')
+    
 
     reservation_date = datetime.strptime(reservation_date, "%Y-%m-%d").strftime("%Y-%m-%d")  # Convert to YYYY-MM-DD format()
 
@@ -252,11 +347,195 @@ def delete_reservation_item(reservation_id):
 
     conn.commit()
     conn.close()
-
+    flash("Reservation deleted successfully.")
     return redirect("/reservations")
 
 
+@app.route("/update_reservation/<int:id>", methods=["GET", "POST"])
+def update_reservation(id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
 
+    # Get the reservation with customer info
+    cursor.execute("""
+        SELECT r.reservation_id, r.Customer_customer_id, r.reservation_date, r.party_size,
+        c.first_name, c.last_name
+        FROM reservation r
+        JOIN customer c ON r.Customer_customer_id = c.customer_id
+        WHERE r.reservation_id = %s
+    """, (id,))
+    reservation = cursor.fetchone()
+
+    if reservation is None:
+        flash("Reservation not found.")
+        return redirect("/reservations")
+
+    if request.method == "POST":
+        # Only these fields are editable
+        reservation_date = request.form.get("reservation_date")
+        party_size = request.form.get("party_size")
+
+        errors = []
+
+        # Validation
+        if not reservation_date:
+            errors.append("Reservation date is required.")
+        if party_size > 15:
+            errors.append("Party size must be less than or equal to 15.")
+        if not party_size:
+            errors.append("Party size is required.")
+        else:
+            try:
+                party_size_int = int(party_size)
+                if party_size_int <= 0:
+                    errors.append("Party size must be greater than 0.")
+            except ValueError:
+                errors.append("Party size must be a number.")
+
+        # Optional: ensure reservation date is not in the past
+        from datetime import datetime, date
+        if reservation_date:
+            try:
+                res_date = datetime.strptime(reservation_date, "%Y-%m-%d").date()
+                if res_date < date.today():
+                    errors.append("Reservation date cannot be in the past.")
+            except ValueError:
+                errors.append("Invalid date format.")
+
+        if errors:
+            # Flash all errors and stay on the same page
+            for error in errors:
+                flash(error)
+            return render_template("update_reservation.html", reservation=reservation)
+
+        # If valid, update the reservation
+        cursor.execute("""
+            UPDATE reservation
+            SET reservation_date=%s,
+                party_size=%s
+            WHERE reservation_id=%s
+        """, (reservation_date, party_size_int, id))
+        conn.commit()
+        flash("Reservation updated successfully.")
+        conn.close()
+        return redirect("/reservations")
+
+    conn.close()
+    return render_template("update_reservation.html", reservation=reservation)
+
+
+@app.route("/employees")
+def employees():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Employee")
+    employees = cursor.fetchall()
+    conn.close()
+    return render_template('employees.html', employees=employees)
+
+@app.route("/add_employee", methods=["GET", "POST"])
+def add_employee():
+    if request.method == "POST":
+        first = request.form["first_name"]
+        last = request.form["last_name"]
+        role = request.form["role"]
+        hire_date = request.form["hire_date"]
+        errors = []
+
+        # Validation
+        if not first:
+            errors.append("First name is required.")
+        if not last:
+            errors.append("Last name is required.")
+        if not role:
+            errors.append("Role is required.")
+        if not hire_date:
+            errors.append("Hire date is required.")
+        if not re.fullmatch(r"[A-Za-z]+", first):
+            errors.append('First name cannot contain numbers, spaces, or special characters.')
+
+        if not re.fullmatch(r"[A-Za-z]+", last  ):
+            errors.append('Last name cannot contain numbers, spaces, or special characters.')
+            
+        if errors:
+            # Flash all errors and stay on the same page
+            for error in errors:
+                flash(error)
+            return render_template("add_employee.html")
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO Employee (first_name, last_name, role, hire_date) VALUES (%s, %s, %s, %s)", (first, last, role, hire_date))
+        conn.commit()
+        conn.close()
+
+        return redirect("/employees")
+
+    return render_template("add_employee.html")
+
+
+@app.route("/update_employee/<int:id>", methods=["GET", "POST"])
+def update_employee(id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Get the employee info
+    cursor.execute("SELECT * FROM Employee WHERE employee_id = %s", (id,))
+    employee = cursor.fetchone()
+
+    
+    if employee is None:
+        flash("Employee not found.")
+        return redirect("/employees")
+    
+    
+
+    if request.method == "POST":
+        first = request.form["first_name"]
+        last = request.form["last_name"]
+        role = request.form["role"]
+        hire_date = request.form["hire_date"]
+        
+        errors = []
+        if not first:
+            errors.append("First name is required.")
+        if not last:
+            errors.append("Last name is required.")
+        if not role:
+            errors.append("Role is required.")
+        if not hire_date:
+            errors.append("Hire date is required.")
+        if not re.fullmatch(r"[A-Za-z]+", first):
+            errors.append('First name cannot contain numbers, spaces, or special characters.')
+
+        if not re.fullmatch(r"[A-Za-z]+", last  ):
+            errors.append('Last name cannot contain numbers, spaces, or special characters.')
+                
+        if errors:
+            # Flash all errors and stay on the same page
+            for error in errors:
+                flash(error)
+            return render_template("update_employee.html", employee=employee)
+
+        cursor.execute("UPDATE Employee SET first_name=%s, last_name=%s, role=%s, hire_date=%s WHERE employee_id=%s", (first, last, role, hire_date, id))
+        conn.commit()
+        conn.close()
+        flash("Employee updated successfully.")
+        return redirect("/employees")
+
+    conn.close()
+    return render_template("update_employee.html", employee=employee)
+
+
+@app.route("/delete_employee/<int:id>", methods=["POST"])
+def delete_employee(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM Employee WHERE employee_id = %s", (id,))
+    conn.commit()
+    conn.close()
+    flash("Employee deleted successfully.")
+    return redirect("/employees")
 
 if __name__ == '__main__':
     app.run(debug=True)

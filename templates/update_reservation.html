@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+</head>
+<body>
+    
+    <h2>Update Reservation</h2>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul style="color: red;">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
+    <form method="POST" action="/update_reservation/{{ reservation.reservation_id }}">
+    <label>Customer:</label>
+    <p>{{ reservation.first_name }} {{ reservation.last_name }}</p>
+    <input type="hidden" name="customer_id" value="{{ reservation.Customer_customer_id }}">
+
+    <label for="reservation_date">Reservation Date:</label>
+    <input type="date" name="reservation_date" id="reservation_date"
+    value="{{ reservation.reservation_date }}" required><br>
+
+    <label for="party_size">Party Size:</label>
+    <input type="number" name="party_size" id="party_size"
+    value="{{ reservation.party_size }}" required><br>
+
+    <button type="submit">Update Reservation</button>
+</form>
+    </body>
+</html>

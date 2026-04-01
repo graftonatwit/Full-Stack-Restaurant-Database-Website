@@ -1,0 +1,35 @@
+<h2>Update Employee</h2>
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul style="color: red;">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+<form method="POST">
+
+    <label>First Name</label>
+    <input type="text" name="first_name" value="{{ employee.first_name }}">
+
+    <label>Last Name</label>
+    <input type="text" name="last_name" value="{{ employee.last_name }}">
+
+    <label for="role">Role</label>
+    <select name="role" required>
+        <option value="Server" {% if employee.role == "Server" %}selected{% endif %}>Server</option>
+        <option value="Chef" {% if employee.role == "Chef" %}selected{% endif %}>Chef</option>
+        <option value="Host" {% if employee.role == "Host" %}selected{% endif %}>Host</option>
+        <option value="Manager" {% if employee.role == "Manager" %}selected{% endif %}>Manager</option>
+        <option value="Bartender" {% if employee.role == "Bartender" %}selected{% endif %}>Bartender</option>
+    </select>
+
+    <label>Hire Date</label>
+    <input type="date" name="hire_date" value="{{ employee.hire_date }}">
+
+    <button type="submit">Update Customer</button>
+
+</form>
+
+<a href="/customers">Back</a>

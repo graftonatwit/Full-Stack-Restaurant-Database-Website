@@ -1,5 +1,13 @@
 <h2>Update Customer</h2>
-
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul style="color: red;">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
 <form method="POST">
 
     <label>First Name</label>
@@ -12,7 +20,7 @@
     <input type="text" name="phone" value="{{ customer.phone_number }}">
 
     <label>Email</label>
-    <input type="text" name="email" value="{{ customer.email }}">
+    <input type="email" name="email" value="{{ customer.email }}">
 
     <button type="submit">Update Customer</button>
 
