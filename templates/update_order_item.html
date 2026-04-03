@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Order Item</title>
+</head>
+<body>
+    <h1>Update Order Item #{{ order_item.order_item_id }}</h1>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul style="color:red;">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        Quantity: <input type="number" name="quantity" min="1" value="{{ order_item.quantity }}" required><br>
+        Special Instructions: <input type="text" name="special_instructions" value="{{ order_item.special_instructions }}"><br>
+        <button type="submit">Update Item</button>
+    </form>
+</body>
+</html>

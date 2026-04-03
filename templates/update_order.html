@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Order</title>
+</head>
+<body>
+    <h1>Update Order #{{ order.order_id }}</h1>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul style="color:red;">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        Status:
+        <select name="status" required>
+            <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+            <option value="In Progress" {% if order.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+            <option value="Completed" {% if order.status == 'Completed' %}selected{% endif %}>Completed</option>
+            <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+        </select><br>
+        Order Date: <input type="datetime-local" name="order_date" required>
+        <button type="submit">Update Order</button>
+    </form>
+</body>
+</html>

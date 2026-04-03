@@ -22,6 +22,8 @@
                     <li><a href="/add_customer">Add Customer</a></li>
                     <li><a href="/menu">Menu</a></li>
                     <li><a href = "/employees">Employees</a></li>
+                    <li><a href = "/orders">Orders</a></li>
+                    
                 </ul>
             </li>
         </ul>
@@ -50,6 +52,14 @@
         </option>
     {% endfor %}
 </select>
+
+<label for="table_id">Table:</label>
+    <select name="table_id" id="table_id" required>
+        <option value="">Select table</option>
+        {% for t in tables %}
+        <option value="{{ t.table_id }}">Table {{ t.table_number }} (Capacity: {{ t.capacity }})</option>
+        {% endfor %}
+    </select>
     
 
     <label for="reservation_date">Date (MM/DD/YYYY):</label>

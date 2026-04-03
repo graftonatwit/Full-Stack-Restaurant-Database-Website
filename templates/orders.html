@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Orders</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
+</head>
+<body>
+    <img src="{{ url_for('static', filename='logo.png') }}" 
+        alt="Restaurant Logo" 
+        class="navbar__logo">
+    
+    <nav class="navbar">
+        
+        <ul class="navbar__menu">
+            <li class="dropdown">
+                <a href="#" class="navbar__links">Navigation</a>    
+                <ul class="dropdown__menu">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/add_customer">Add Customer</a></li>
+                    <li><a href="/menu">Menu</a></li>
+                    <li><a href="/reservations">Reservations</a></li>
+                    <li><a href = "/employees">Employees</a></li>
+                    
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    <h1>Orders</h1>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul style="color:red;">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% endwith %}
+
+    <h2>Add Order</h2>
+    <form method="POST" action="/add_order">
+        Customer:
+        <select name="customer_id" required>
+            <option value="">Select Customer</option>
+            {% for customer in customers %}
+                <option value="{{ customer.customer_id }}">{{ customer.first_name }} {{ customer.last_name }}</option>
+            {% endfor %}
+        </select><br>
+        Employee:
+        <select name="employee_id" required>
+            <option value="">Select Employee</option>
+            {% for employee in employees %}
+                <option value="{{ employee.employee_id }}">{{ employee.first_name }} {{ employee.last_name }}</option>
+            {% endfor %}
+        </select><br>
+        Status:
+        <select name="status" required>
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+        </select><br>
+        Order Date: <input type="datetime-local" name="order_date" required>
+        <button type="submit">Add Order</button>
+    </form>
+
+    <h2>Existing Orders</h2>
+    <table border="1">
+        <tr>
+            <th>Order ID</th>
+            <th>Date (Ordered/Completed)</th>
+            <th>Status</th>
+            <th>Customer</th>
+            <th>Employee</th>
+            <th>Actions</th>
+        </tr>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.order_id }}</td>
+            <td>{{ order.order_date }}</td>
+            <td>{{ order.status }}</td>
+            <td>{{ order.first_name }} {{ order.last_name }}</td>
+            <td>{{ order.emp_first_name }} {{ order.emp_last_name }}</td>
+            <td>
+                <form action="/update_order/{{ order.order_id }}" method="Get" style="display:inline;">
+                    <button type="submit">Update</button>
+                </form>
+                <form action="/delete_order/{{ order.order_id }}" method="POST" style="display:inline;">
+                    <button type="submit">Delete</button>
+                </form>
+                <a href="/order_items/{{ order.order_id }}">View Items</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+</body>
+</html>

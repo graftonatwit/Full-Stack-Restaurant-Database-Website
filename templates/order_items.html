@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Items</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
+</head>
+<body>
+    <img src="{{ url_for('static', filename='logo.png') }}" 
+        alt="Restaurant Logo" 
+        class="navbar__logo">
+    
+    <nav class="navbar">
+        
+        <ul class="navbar__menu">
+            <li class="dropdown">
+                <a href="#" class="navbar__links">Navigation</a>    
+                <ul class="dropdown__menu">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/add_customer">Add Customer</a></li>
+                    <li><a href="/menu">Menu</a></li>
+                    <li><a href="/reservations">Reservations</a></li>
+                    <li><a href = "/employees">Employees</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    <h1>Order #{{ order.order_id }} Items</h1>
+    <p>{{ order.first_name }} {{ order.last_name }} | {{ order.status }}</p>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul style="color:red;">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% endwith %}
+
+    <h2>Add Order Item</h2>
+<form method="POST" action="/add_order_item">
+    
+    <!-- Hidden order_id so user doesn't have to pick again -->
+    <input type="hidden" name="order_id" value="{{ order.order_id }}">
+
+    Menu Item:
+    <select name="menu_item_id" required>
+        <option value="">Select Menu Item</option>
+        {% for item in menu_items %}
+            <option value="{{ item.menu_item_id }}">
+                {{ item.name }} - ${{ "%.2f"|format(item.Price) }}
+            </option>
+        {% endfor %}
+    </select><br>
+
+    Quantity: <input type="number" name="quantity" min="1" required><br>
+    Special Instructions: <input type="text" name="special_instructions"><br>
+    <button type="submit">Add Item</button>
+</form>
+
+
+    <h2>Existing Order Items</h2>
+
+{% if items %}
+<table border="1">
+    <tr>
+        <th>Menu Item</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Special Instructions</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for oi in items %}
+    <tr>
+        <td>{{ oi.menu_item_name }}</td>
+        <td>{{ oi.quantity }}</td>
+        <td>${{ "%.2f"|format(oi.Price) }}</td>
+        <td>{{ oi.special_instructions }}</td>
+        <td>
+            <form action="/delete_order_item/{{ oi.order_item_id }}" method="POST" style="display:inline;">
+                <button type="submit">Delete</button>
+            </form>
+            <form action="/update_order_item/{{ oi.order_item_id }}" method="GET" style="display:inline;">
+                <button type="submit">Update</button>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No items in this order yet.</p>
+{% endif %}
+</body>
+</html>
