@@ -21,6 +21,7 @@
                     <li><a href="/menu">Menu</a></li>
                     <li><a href="/reservations">Reservations</a></li>
                     <li><a href = "/employees">Employees</a></li>
+                    <li><a href = "/orders">Orders</a></li>
                     
                 </ul>
             </li>
@@ -47,11 +48,11 @@
                 <option value="{{ customer.customer_id }}">{{ customer.first_name }} {{ customer.last_name }}</option>
             {% endfor %}
         </select><br>
-        Employee:
+        Server:
         <select name="employee_id" required>
-            <option value="">Select Employee</option>
+            <option value="">Select Server</option>
             {% for employee in employees %}
-                <option value="{{ employee.employee_id }}">{{ employee.first_name }} {{ employee.last_name }}</option>
+                <option value="{{ employee.employee_id }}">{{ employee.first_name }} {{ employee.last_name }} ({{ "Server" }})</option>
             {% endfor %}
         </select><br>
         Status:
@@ -72,7 +73,7 @@
             <th>Date (Ordered/Completed)</th>
             <th>Status</th>
             <th>Customer</th>
-            <th>Employee</th>
+            <th>Server</th>
             <th>Actions</th>
         </tr>
         {% for order in orders %}
@@ -89,11 +90,16 @@
                 <form action="/delete_order/{{ order.order_id }}" method="POST" style="display:inline;">
                     <button type="submit">Delete</button>
                 </form>
+                <form action="{{ url_for('customer_summary', customer_id=order.customer_id) }}" method="GET" style="display:inline;">
+    <button type="submit">View {{ order.first_name }}'s Summary</button>
+</form>
+                </form>
                 <a href="/order_items/{{ order.order_id }}">View Items</a>
             </td>
         </tr>
         {% endfor %}
     </table>
+    
     
 </body>
 </html>

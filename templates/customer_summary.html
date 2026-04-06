@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant Management System</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <title>Orders</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
 </head>
 <body>
     <img src="{{ url_for('static', filename='logo.png') }}" 
@@ -18,19 +17,38 @@
                 <a href="#" class="navbar__links">Navigation</a>    
                 <ul class="dropdown__menu">
                     <li><a href="/">Home</a></li>
-                    <li><a href="/customers">Customers</a></li>
                     <li><a href="/add_customer">Add Customer</a></li>
                     <li><a href="/menu">Menu</a></li>
                     <li><a href="/reservations">Reservations</a></li>
                     <li><a href = "/employees">Employees</a></li>
-                    <li><a href = "/orders">Orders</a></li>
-                    <li><a href = "/customer_summary">Customer Summary</a></li>
+                    
                 </ul>
             </li>
         </ul>
     </nav>
-    <h1>Welcome to Trevor's Restaurant Management System</h1>
+<h2>Customer Orders</h2>
 
-</a>
+<table border="1">
+    <tr>
+        <th>Order ID</th>
+        <th>Date</th>
+        <th>Total</th>
+    </tr>
+    {% for order in orders %}
+    <tr>
+        <td>{{ order.order_id }}</td>
+        <td>{{ order.order_date }}</td>
+        <td>${{ "%.2f"|format(order.total) }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h3>Total Spent: ${{ "%.2f"|format(total_spent) }}</h3>
+
+{% if orders %}
+<a href="/orders">Back to Orders</a>
+{% else %}
+<p>No orders for this customer.</p>
+{% endif %}
 </body>
 </html>

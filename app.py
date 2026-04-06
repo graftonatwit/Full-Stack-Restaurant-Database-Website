@@ -52,12 +52,7 @@ def face_login():
             matches = face_recognition.compare_faces([KNOWN_ENCODING], encoding)
             if True in matches:
                 session["logged_in"] = True
-                return """
-                    
-                    <script>
-                        setTimeout(() => { window.location.href = '/'; }, 1000);
-                    </script>
-                """
+                return "Face recognized"
 
         return "Face not recognized"
 
@@ -153,12 +148,24 @@ def delete_menu_item(item_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    #cursor.execute("DELETE FROM OrderItem WHERE menu_item_id = %s", (item_id,))
-    cursor.execute("DELETE FROM MenuItem WHERE menu_item_id = %s", (item_id,))
+    # Check for existing orders using this menu item
+    cursor.execute("SELECT order_item_id FROM OrderItem WHERE MenuItem_menu_item_id = %s", (item_id,))
+    order_items = cursor.fetchall()
 
+    if order_items:
+        # Update status to 'cancelled'
+        cursor.execute("""
+            UPDATE OrderItem
+            SET status = 'cancelled'
+            WHERE MenuItem_menu_item_id = %s
+        """, (item_id,))
+
+    # Now safe to delete menu item
+    cursor.execute("DELETE FROM MenuItem WHERE menu_item_id = %s", (item_id,))
+    
     conn.commit()
     conn.close()
-    flash("Menu item deleted successfully.")
+    flash("Menu item deleted and related orders cancelled.")
     return redirect("/menu")
 
 @app.route("/update_menu_item/<int:item_id>", methods=["GET", "POST"])
@@ -647,10 +654,10 @@ def orders():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # Get all orders with customer and employee names
+    # Get all orders with customer and employee names, include customer_id
     cursor.execute("""
         SELECT o.order_id, o.order_date, o.status,
-            c.first_name, c.last_name,
+            c.customer_id, c.first_name, c.last_name,
             e.first_name AS emp_first_name, e.last_name AS emp_last_name
         FROM `Order` o
         JOIN Customer c ON o.Customer_customer_id = c.customer_id
@@ -663,13 +670,12 @@ def orders():
     cursor.execute("SELECT customer_id, first_name, last_name FROM Customer")
     customers = cursor.fetchall()
 
-    # Get all employees for dropdown
-    cursor.execute("SELECT employee_id, first_name, last_name FROM Employee")
+    # Get all employees who are servers only
+    cursor.execute("SELECT employee_id, first_name, last_name FROM Employee WHERE role = 'Server'")
     employees = cursor.fetchall()
 
     conn.close()
     return render_template("orders.html", orders=orders, customers=customers, employees=employees)
-
 
 from datetime import datetime
 
@@ -897,5 +903,27 @@ def delete_order_item(item_id):
     return redirect(f'/order_items/{order_id}')
 
 
+@app.route("/customer/<int:customer_id>/summary")
+def customer_summary(customer_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Get all orders for this customer
+    cursor.execute("SELECT order_id, order_date FROM `Order` WHERE Customer_customer_id = %s", (customer_id,))
+    orders = cursor.fetchall()
+
+    # Add total for each order using the MySQL function
+    for order in orders:
+        cursor.execute("SELECT GetOrderTotal(%s) AS total", (order['order_id'],))
+        order_total = cursor.fetchone()
+        order['total'] = float(order_total['total'])
+
+    # Sum up all orders to get customer's total spent
+    total_spent = sum(order['total'] for order in orders)
+
+    conn.close()
+    return render_template("customer_summary.html", orders=orders, total_spent=total_spent)
+
 if __name__ == '__main__':
     app.run(debug=True)
+

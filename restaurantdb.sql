@@ -186,6 +186,31 @@ BEGIN
 END $$
 DELIMITER ;
 
+<<<<<<< HEAD
+=======
+
+-- -----------------------------------------------------
+-- TRIGGER: Validate Menu Item
+-- -----------------------------------------------------
+DELIMITER $$
+
+CREATE TRIGGER menuitem_before_insert
+BEFORE INSERT ON menuitem
+FOR EACH ROW
+BEGIN
+    IF EXISTS (
+        SELECT 1 
+        FROM menuitem 
+        WHERE name = NEW.name
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Menu item with this name already exists.';
+    END IF;
+END$$
+
+DELIMITER ;
+
+>>>>>>> 2c5fb3d (Added new crud operations and input validation)
 -- -----------------------------------------------------
 -- REPORT: Top Customers by Spending
 -- -----------------------------------------------------
