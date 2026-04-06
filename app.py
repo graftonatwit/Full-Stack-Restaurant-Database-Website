@@ -148,21 +148,31 @@ def delete_menu_item(item_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Check for existing orders using this menu item
-    cursor.execute("SELECT order_item_id FROM OrderItem WHERE MenuItem_menu_item_id = %s", (item_id,))
-    order_items = cursor.fetchall()
+    # Find all orders that include this menu item
+    cursor.execute("""
+        SELECT DISTINCT Order_order_id 
+        FROM OrderItem 
+        WHERE MenuItem_menu_item_id = %s
+    """, (item_id,))
+    order_ids = cursor.fetchall()  # list of tuples
 
-    if order_items:
-        # Update status to 'cancelled'
+    if order_ids:
+        # Update status to 'Cancelled' in the Order table
+        cursor.executemany("""
+            UPDATE `Order`
+            SET status = 'Cancelled'
+            WHERE order_id = %s
+        """, order_ids)
+
+        # Delete related OrderItems
         cursor.execute("""
-            UPDATE OrderItem
-            SET status = 'cancelled'
+            DELETE FROM OrderItem
             WHERE MenuItem_menu_item_id = %s
         """, (item_id,))
 
     # Now safe to delete menu item
     cursor.execute("DELETE FROM MenuItem WHERE menu_item_id = %s", (item_id,))
-    
+
     conn.commit()
     conn.close()
     flash("Menu item deleted and related orders cancelled.")
