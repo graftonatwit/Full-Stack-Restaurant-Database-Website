@@ -11,6 +11,7 @@ import io
 import numpy as np
 import face_recognition
 import re
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey" 
@@ -28,7 +29,7 @@ def get_db_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="@flag961TOAD",
+        password="DB_PASSWORD",
         database="restaurantdb"
     )
     
